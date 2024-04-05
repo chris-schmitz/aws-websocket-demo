@@ -7,3 +7,17 @@ So, this codebase for me is:
 - Building out the infrastructure needed for a simple websocket setup using api gateway, lambdas, and dynamodb 
 - Learning the serverless cli tools, _maybe_ diving into the serverless application model if there's enough time
 
+# Up and running
+
+## Deploying to AWS
+The severless deployment depends on what AWS credentials you're using locally. If you've pulled down the dev credentials it will deploy to the dev **account**, if you have the prod credentials it will deploy to the prod **account**. 
+
+Note that while I added a `stage` configuration in the serverless.yml file I haven't piped that in everwhere, so while you'll see the `-dev` suffix pop up on most things it's not on everything yet (and really, this should only live in dev so I'm not in a hurry to pop it in everywhere).
+
+```commandline
+# deploy to aws
+sls deploy
+
+# destroy aws infrastructure
+sls remove
+```
