@@ -3,8 +3,7 @@
   <component name="Black">
     <option name="enabledOnReformat" value="true" />
     <option name="enabledOnSave" value="true" />
-    <option name="pathToExecutable" value="$USER_HOME$/.pyenv/shims/black" />
-    <option name="sdkName" value="Python 3.12 (schmitz-websockets)" />
+    <option name="sdkName" value="Python 3.11 (aws-websocket-demo)" />
   </component>
-  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.12 (schmitz-websockets)" project-jdk-type="Python SDK" />
+  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.11 (aws-websocket-demo)" project-jdk-type="Python SDK" />
 </project>
