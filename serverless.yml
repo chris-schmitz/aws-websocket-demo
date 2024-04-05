@@ -1,0 +1,75 @@
+# * prob best starting point: https://www.serverless.com/framework/docs-providers-aws-events-websocket
+org: cschmitz
+app: schmitz-websockets
+service: schmitz-websockets
+
+frameworkVersion: '3'
+
+custom:
+  stage: ${opt:stage, 'dev'}
+  connections-table:
+    name: ${self:service}-${self:custom.stage}
+
+provider:
+  name: aws
+  runtime: python3.11
+  websocketsApiName: schmitz-websockets-api
+  websocketsApiRouteSelectionExpression: $request.body.action
+  websocketsDescription: Chris working through setting up websockets from scratch. Feel free to delete
+
+#arn:aws:sts::110478994207:assumed-role/schmitz-websockets-dev-us-east-1-lambdaRole/
+  iamRoleStatements:
+    - Effect: Allow
+      Resource:
+        - !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${AWS::StackName}
+        - !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${AWS::StackName}-* # ? is this actually neede??
+      Action:
+        - dynamodb:PutItem
+        - dynamodb:DeleteItem
+        - dynamodb:Query
+
+
+# * helpful docs: https://www.serverless.com/framework/docs-providers-aws-events-websocket
+functions:
+
+  websocket-connections-handler:
+    handler: src.handlers.connections.handle
+    events:
+      - websocket:
+          route: $connect
+      - websocket:
+          route: $disconnect
+    environment:
+      CONNECTIONS_TABLE_NAME: ${self:custom.connections-table.name}
+
+
+  websocket-default-handler:
+    handler: src.handlers.default.handle
+    events:
+      - websocket:
+          route: $default
+
+  websocket-message-handler:
+    handler: src.handlers.message.handle
+    events:
+      - websocket:
+          route: message
+
+resources:
+  Resources:
+
+    ConnectionsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.connections-table.name}
+        BillingMode: PAY_PER_REQUEST
+        KeySchema:
+          - AttributeName: connection_id
+            KeyType: HASH
+          - AttributeName: email
+            KeyType: RANGE
+        AttributeDefinitions:
+          - AttributeName: connection_id
+            AttributeType: S
+          - AttributeName: email
+            AttributeType: S
