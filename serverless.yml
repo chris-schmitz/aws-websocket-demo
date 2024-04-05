@@ -5,6 +5,9 @@ service: schmitz-websockets
 
 frameworkVersion: '3'
 
+plugins:
+  - serverless-python-requirements
+
 custom:
   stage: ${opt:stage, 'dev'}
   connections-table:
