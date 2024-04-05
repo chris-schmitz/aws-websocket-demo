@@ -2,7 +2,6 @@
 org: cschmitz
 app: schmitz-websockets
 service: schmitz-websockets
-
 frameworkVersion: '3'
 
 plugins:
@@ -16,18 +15,19 @@ custom:
 provider:
   name: aws
   runtime: python3.11
+
   websocketsApiName: schmitz-websockets-api
   websocketsApiRouteSelectionExpression: $request.body.action
   websocketsDescription: Chris working through setting up websockets from scratch. Feel free to delete
 
-#arn:aws:sts::110478994207:assumed-role/schmitz-websockets-dev-us-east-1-lambdaRole/
   iamRoleStatements:
     - Effect: Allow
       Resource:
         - !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${AWS::StackName}
-        - !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${AWS::StackName}-* # ? is this actually neede??
+        - !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${AWS::StackName}-* # ? is this actually needed??
       Action:
         - dynamodb:PutItem
+        - dynamodb:UpdateItem
         - dynamodb:DeleteItem
         - dynamodb:Query
 
@@ -35,16 +35,29 @@ provider:
 # * helpful docs: https://www.serverless.com/framework/docs-providers-aws-events-websocket
 functions:
 
-  websocket-connections-handler:
-    handler: src.handlers.connections.handle
+  websocket-connect-handler:
+    handler: src.handlers.connections.handle_connect
     events:
       - websocket:
           route: $connect
+    environment:
+      CONNECTIONS_TABLE_NAME: ${self:custom.connections-table.name}
+
+  websocket-disconnect-handler:
+    handler: src.handlers.connections.handle_disconnect
+    events:
       - websocket:
           route: $disconnect
     environment:
       CONNECTIONS_TABLE_NAME: ${self:custom.connections-table.name}
 
+  websocket-login-handler:
+    handler: src.handlers.connections.handle_login
+    events:
+      - websocket:
+          route: login
+    environment:
+      CONNECTIONS_TABLE_NAME: ${self:custom.connections-table.name}
 
   websocket-default-handler:
     handler: src.handlers.default.handle
@@ -69,10 +82,6 @@ resources:
         KeySchema:
           - AttributeName: connection_id
             KeyType: HASH
-          - AttributeName: email
-            KeyType: RANGE
         AttributeDefinitions:
           - AttributeName: connection_id
-            AttributeType: S
-          - AttributeName: email
             AttributeType: S

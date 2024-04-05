@@ -21,3 +21,15 @@ sls deploy
 # destroy aws infrastructure
 sls remove
 ```
+
+# Demo highlights
+
+- Direct serverless deploy
+  - Watching cloudformation
+  - Addressing cloudformation snags more gracefully
+    - E.g. a resource that can't be created b/c it can't be renamed -> sls remove and then deploy (our cicd doesn't do that (double check))
+- API Gateway/Websocket nuances
+  - The route expression is prefixed with `$request.body.<...>`
+    - `request` is the request event, not a property 
+    - `body` is the event property body, but it's automatically added
+    - `<...>` is whatever json property you actually want to use, so when you see examples like `$request.body.action`, your message payload just needs `{"action":"some-action"}`
